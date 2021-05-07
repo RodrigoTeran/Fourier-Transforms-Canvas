@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from "react";
 
-export const useDrawing = (canvasRef: HTMLCanvasElement | null): void => {
+export const useDrawing = (canvasRef: HTMLCanvasElement | null, pencilColor : string): void => {
   const ctx = useRef<CanvasRenderingContext2D | null>(null);
   const [rerender, setRerender] = useState<boolean>(false);
 
@@ -59,7 +59,7 @@ export const useDrawing = (canvasRef: HTMLCanvasElement | null): void => {
         currX.current = e.clientX - canvasRef.getBoundingClientRect().left;
         currY.current = e.clientY - canvasRef.getBoundingClientRect().top;
 
-        firstX.current = currX.current; 
+        firstX.current = currX.current;
         firstY.current = currY.current;
         isDrawing.current = true;
       }
@@ -86,11 +86,10 @@ export const useDrawing = (canvasRef: HTMLCanvasElement | null): void => {
       ctx.current.beginPath();
       ctx.current.moveTo(prevX.current, prevY.current);
       ctx.current.lineTo(currX.current, currY.current);
+      ctx.current.strokeStyle = pencilColor;
       ctx.current.lineWidth = lineWidth.current;
       ctx.current.stroke();
       ctx.current.closePath();
     }
   };
 };
-
-export default useDrawing;

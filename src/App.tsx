@@ -8,7 +8,6 @@ const App = () => {
   return (
     <>
       <Nav></Nav>
-      <h1>HOLA</h1>
       <Canvas></Canvas>
     </>
   );

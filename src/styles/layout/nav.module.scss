@@ -4,11 +4,34 @@
   top: 0;
   left: 0;
   width: 100vw;
-  height: 65px;
+  height: var(--height-nav);
   color: var(--white);
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0 20px;
-  font-size: 1.5rem;
-  font-weight: bold;
+  h1 {
+    font-size: 1.3rem;
+    font-weight: bold;
+  }
+  &__right {
+    button {
+      background-color: var(--terciary-color);
+      color: var(--white);
+      font-weight: bold;
+      font-size: 1.1rem;
+      padding: 7.5px 15px;
+      transition: background-color linear 300ms, color linear 300ms;
+      @media (hover: hover) and (pointer: fine) {
+        &:hover {
+          background-color: var(--white);
+          color: var(--terciary-color);
+        }
+        &:active {
+          background-color: var(--terciary-color);
+          color: var(--white);
+        }
+      }
+    }
+  }
 }

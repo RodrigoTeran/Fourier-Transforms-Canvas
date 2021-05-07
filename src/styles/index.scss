@@ -5,10 +5,15 @@
 }
 
 :root {
-  --primary-color: rgb(78, 88, 221);
-  --secondary-color: rgb(48, 48, 48);
+  --primary-color: rgb(4, 35, 65);
+  --secondary-color: rgb(27, 31, 34);
+  --terciary-color: rgb(245, 82, 150);
   --white: #FFF;
+  --gray-1: rgb(39, 39, 39);
+  --gray-2: rgb(71, 71, 71);
   --black: #000;
+
+  --height-nav: 65px;
 }
 
 html, body {
@@ -21,6 +26,15 @@ html, body {
 }
 
 ::selection {
-  background-color: var(--secondary-color);
+  background-color: var(--terciary-color);
   color: var(--white);
+}
+
+button {
+  border: none;
+  outline: none;
+  cursor: pointer;
+  &:focus {
+    outline: none;
+  }
 }
