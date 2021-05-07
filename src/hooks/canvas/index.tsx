@@ -13,6 +13,11 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
     setIsDrawingFinished,
     isCanvasNeedToClear,
     setIsCanvasNeedToClear,
+    setMessagesColor,
+    setMessagesText,
+    startInterval,
+    secondsDrawing,
+    breakInterval,
   } = useContext(GlobalContext);
 
   const ctx = useRef<CanvasRenderingContext2D | null>(null);
@@ -47,6 +52,9 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
         clearCanvas();
       }
 
+      // Update Time
+      updateTime();
+
       return () => {
         // Remove Event Listeners
         canvasRef.removeEventListener("mousemove", mouseMove);
@@ -55,7 +63,14 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
         canvasRef.removeEventListener("mouseout", mouseOut);
       };
     }
-  }, [rerender, isDrawingFinished, isCanvasNeedToClear]);
+  }, [rerender, isDrawingFinished, isCanvasNeedToClear, secondsDrawing]);
+
+  const updateTime = (): void => {
+    if (setMessagesColor && setMessagesText) {
+      setMessagesColor("#000");
+      setMessagesText("Time: " + secondsDrawing?.toFixed());
+    }
+  };
 
   const mouseMove = (e: MouseEvent): void => {
     if (!isDrawingFinished) {
@@ -64,6 +79,10 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
   };
   const mouseDown = (e: MouseEvent): void => {
     if (!isDrawingFinished) {
+      if (startInterval) {
+        updateTime();
+        startInterval();
+      }
       findxy("down", e);
     }
   };
@@ -96,6 +115,9 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
           prevY.current = firstY.current;
           draw();
           setIsDrawingFinished(true);
+          if (breakInterval) {
+            breakInterval();
+          }
         }
         isDrawing.current = false;
       }

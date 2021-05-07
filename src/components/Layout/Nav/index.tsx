@@ -10,9 +10,14 @@ import { useIsMobile } from "../../../hooks/layout/index";
 import { GlobalContext } from "../../../App";
 
 const Nav = () => {
-  const { isDrawingFinished, setIsCanvasNeedToClear } = useContext(
-    GlobalContext
-  );
+  const {
+    isDrawingFinished,
+    setIsCanvasNeedToClear,
+    setMessagesColor,
+    setMessagesText,
+    setSecondsDrawing,
+    breakInterval
+  } = useContext(GlobalContext);
 
   const [isMobile, setIsMobile] = useState<boolean>(false);
   useIsMobile(setIsMobile);
@@ -30,13 +35,26 @@ const Nav = () => {
             onClick={() => {
               if (setIsCanvasNeedToClear) {
                 setIsCanvasNeedToClear(true);
-              };
+                if (setSecondsDrawing && breakInterval) {
+                  breakInterval();
+                  setSecondsDrawing(0)
+                }
+              }
             }}
           >
             {isMobile ? "Clear" : "Clear Canvas"}
           </button>
         )}
-        <button>Compute</button>
+        <button
+          onClick={() => {
+            if (setMessagesText && setMessagesColor && !isDrawingFinished) {
+              setMessagesText("First you need to draw something in the canvas");
+              setMessagesColor("#F00");
+            }
+          }}
+        >
+          Compute
+        </button>
       </div>
     </nav>
   );
