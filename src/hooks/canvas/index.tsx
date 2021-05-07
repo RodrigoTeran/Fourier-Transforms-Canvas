@@ -7,6 +7,8 @@ interface PropsDrawingHook {
   (canvasRef: HTMLCanvasElement | null, pencilColor: string): void;
 }
 
+const MAX_TIME: number = 5;
+
 export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
   const {
     isDrawingFinished,
@@ -67,8 +69,20 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
 
   const updateTime = (): void => {
     if (setMessagesColor && setMessagesText) {
+      if (secondsDrawing && secondsDrawing >= MAX_TIME) {
+        finishMovement();
+      }
       setMessagesColor("#000");
-      setMessagesText("Time: " + secondsDrawing?.toFixed());
+      if (secondsDrawing !== undefined) {
+        var time: number | string = secondsDrawing.toFixed();
+        time = parseInt(time);
+        time = MAX_TIME - time;
+        if (secondsDrawing === 0) {
+          setMessagesText(`Draw something :)`);
+        } else {
+          setMessagesText(`Time remaining to draw: ${time}`);
+        }
+      }
     }
   };
 
@@ -110,16 +124,7 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
         isDrawing.current = true;
       }
       if (res === "up" || res === "out") {
-        if (setIsDrawingFinished && isDrawing.current) {
-          prevX.current = firstX.current;
-          prevY.current = firstY.current;
-          draw();
-          setIsDrawingFinished(true);
-          if (breakInterval) {
-            breakInterval();
-          }
-        }
-        isDrawing.current = false;
+        finishMovement();
       }
       if (res === "move") {
         if (isDrawing.current) {
@@ -131,6 +136,19 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
         }
       }
     }
+  };
+
+  const finishMovement = (): void => {
+    if (setIsDrawingFinished && isDrawing.current) {
+      prevX.current = firstX.current;
+      prevY.current = firstY.current;
+      draw();
+      setIsDrawingFinished(true);
+      if (breakInterval) {
+        breakInterval();
+      }
+    }
+    isDrawing.current = false;
   };
 
   const draw = (): void => {

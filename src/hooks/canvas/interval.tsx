@@ -34,7 +34,7 @@ export const useInterval: PropsInterval = (setSeconds, seconds, difference) => {
     },
     () => {
       // Start
-      if (seconds != 0) {
+      if (seconds !== 0) {
         setSeconds(0);
       }
       setIsStartingInterval(true);
