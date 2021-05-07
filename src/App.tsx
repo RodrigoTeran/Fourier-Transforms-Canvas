@@ -11,15 +11,24 @@ export const GlobalContext = createContext<Partial<ValueAppProvider>>({});
 interface ValueAppProvider {
   isDrawingFinished: boolean;
   setIsDrawingFinished: Dispatch<SetStateAction<boolean>>;
+  isCanvasNeedToClear: boolean;
+  setIsCanvasNeedToClear: Dispatch<SetStateAction<boolean>>;
 }
 
 const App = () => {
   const [isDrawingFinished, setIsDrawingFinished] = useState<boolean>(false);
+
+  const [isCanvasNeedToClear, setIsCanvasNeedToClear] = useState<boolean>(
+    false
+  );
+
   return (
     <GlobalContext.Provider
       value={{
         isDrawingFinished: isDrawingFinished,
         setIsDrawingFinished: setIsDrawingFinished,
+        isCanvasNeedToClear: isCanvasNeedToClear,
+        setIsCanvasNeedToClear: setIsCanvasNeedToClear,
       }}
     >
       <Nav></Nav>

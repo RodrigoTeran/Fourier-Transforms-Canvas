@@ -8,7 +8,12 @@ interface PropsDrawingHook {
 }
 
 export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
-  const { isDrawingFinished, setIsDrawingFinished } = useContext(GlobalContext);
+  const {
+    isDrawingFinished,
+    setIsDrawingFinished,
+    isCanvasNeedToClear,
+    setIsCanvasNeedToClear,
+  } = useContext(GlobalContext);
 
   const ctx = useRef<CanvasRenderingContext2D | null>(null);
   const [rerender, setRerender] = useState<boolean>(false);
@@ -37,6 +42,11 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
       canvasRef.addEventListener("mouseup", mouseUp);
       canvasRef.addEventListener("mouseout", mouseOut);
 
+      // Clear Canvas
+      if (isCanvasNeedToClear) {
+        clearCanvas();
+      }
+
       return () => {
         // Remove Event Listeners
         canvasRef.removeEventListener("mousemove", mouseMove);
@@ -45,7 +55,7 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
         canvasRef.removeEventListener("mouseout", mouseOut);
       };
     }
-  }, [rerender, isDrawingFinished]);
+  }, [rerender, isDrawingFinished, isCanvasNeedToClear]);
 
   const mouseMove = (e: MouseEvent): void => {
     if (!isDrawingFinished) {
@@ -81,13 +91,13 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
         isDrawing.current = true;
       }
       if (res === "up" || res === "out") {
-        prevX.current = firstX.current;
-        prevY.current = firstY.current;
-        isDrawing.current = false;
-        draw();
-        if (setIsDrawingFinished && res === "up") {
+        if (setIsDrawingFinished && isDrawing.current) {
+          prevX.current = firstX.current;
+          prevY.current = firstY.current;
+          draw();
           setIsDrawingFinished(true);
         }
+        isDrawing.current = false;
       }
       if (res === "move") {
         if (isDrawing.current) {
@@ -110,6 +120,16 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
       ctx.current.lineWidth = lineWidth.current;
       ctx.current.stroke();
       ctx.current.closePath();
+    }
+  };
+
+  const clearCanvas = (): void => {
+    if (canvasRef && ctx.current) {
+      ctx.current.clearRect(0, 0, canvasRef.width, canvasRef.height);
+      if (setIsCanvasNeedToClear && setIsDrawingFinished) {
+        setIsCanvasNeedToClear(false);
+        setIsDrawingFinished(false);
+      }
     }
   };
 };

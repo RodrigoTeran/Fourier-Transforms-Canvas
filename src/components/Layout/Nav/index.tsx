@@ -10,7 +10,9 @@ import { useIsMobile } from "../../../hooks/layout/index";
 import { GlobalContext } from "../../../App";
 
 const Nav = () => {
-  const { isDrawingFinished } = useContext(GlobalContext);
+  const { isDrawingFinished, setIsCanvasNeedToClear } = useContext(
+    GlobalContext
+  );
 
   const [isMobile, setIsMobile] = useState<boolean>(false);
   useIsMobile(setIsMobile);
@@ -23,7 +25,17 @@ const Nav = () => {
         <h1>{process.env.REACT_APP_APP_NAME}</h1>
       )}
       <div className={styles.nav__right}>
-        {isDrawingFinished && <button>{isMobile ? "Clear" : "Clear Canvas"}</button>}
+        {isDrawingFinished && (
+          <button
+            onClick={() => {
+              if (setIsCanvasNeedToClear) {
+                setIsCanvasNeedToClear(true);
+              };
+            }}
+          >
+            {isMobile ? "Clear" : "Clear Canvas"}
+          </button>
+        )}
         <button>Compute</button>
       </div>
     </nav>

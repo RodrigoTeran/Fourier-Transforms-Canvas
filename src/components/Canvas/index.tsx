@@ -2,7 +2,11 @@
 import styles from "../../styles/canvas/canvas.module.scss";
 
 // Hooks
-import { useRef, useState, useContext } from "react";
+import {
+  useRef,
+  useState,
+  // useContext
+} from "react";
 import { useDrawing } from "../../hooks/canvas/index";
 import { useWidth } from "../../hooks/layout/index";
 
