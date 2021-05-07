@@ -1,0 +1,26 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --primary-color: rgb(78, 88, 221);
+  --secondary-color: rgb(48, 48, 48);
+  --white: #FFF;
+  --black: #000;
+}
+
+html, body {
+  min-height: 100vh;
+  width: 100vw;
+  overflow-x: hidden;
+  position: relative;
+  font-family: sans-serif;
+  font-size: 16px;
+}
+
+::selection {
+  background-color: var(--secondary-color);
+  color: var(--white);
+}
