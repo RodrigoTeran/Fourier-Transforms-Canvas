@@ -22,6 +22,9 @@
       font-size: 1.1rem;
       padding: 7.5px 15px;
       transition: background-color linear 300ms, color linear 300ms;
+      &:nth-child(2) {
+        margin-left: 20px;
+      }
       @media (hover: hover) and (pointer: fine) {
         &:hover {
           background-color: var(--white);

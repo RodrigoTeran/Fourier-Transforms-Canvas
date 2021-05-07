@@ -2,11 +2,16 @@
 import styles from "../../styles/canvas/canvas.module.scss";
 
 // Hooks
-import { useRef, useState } from "react";
+import { useRef, useState, useContext } from "react";
 import { useDrawing } from "../../hooks/canvas/index";
 import { useWidth } from "../../hooks/layout/index";
 
+// App Context
+// import { GlobalContext } from "../../App";
+
 const Canvas = () => {
+  // const { isDrawingFinished, setIsDrawingFinished } = useContext(GlobalContext);
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [widthCanvas, setWidthCanvas] = useState<number>(750);
 

@@ -1,6 +1,15 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState, useContext } from "react";
 
-export const useDrawing = (canvasRef: HTMLCanvasElement | null, pencilColor : string): void => {
+// App Context
+import { GlobalContext } from "../../App";
+
+interface PropsDrawingHook {
+  (canvasRef: HTMLCanvasElement | null, pencilColor: string): void;
+}
+
+export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
+  const { isDrawingFinished, setIsDrawingFinished } = useContext(GlobalContext);
+
   const ctx = useRef<CanvasRenderingContext2D | null>(null);
   const [rerender, setRerender] = useState<boolean>(false);
 
@@ -36,19 +45,27 @@ export const useDrawing = (canvasRef: HTMLCanvasElement | null, pencilColor : st
         canvasRef.removeEventListener("mouseout", mouseOut);
       };
     }
-  }, [rerender]);
+  }, [rerender, isDrawingFinished]);
 
   const mouseMove = (e: MouseEvent): void => {
-    findxy("move", e);
+    if (!isDrawingFinished) {
+      findxy("move", e);
+    }
   };
   const mouseDown = (e: MouseEvent): void => {
-    findxy("down", e);
+    if (!isDrawingFinished) {
+      findxy("down", e);
+    }
   };
   const mouseUp = (e: MouseEvent): void => {
-    findxy("up", e);
+    if (!isDrawingFinished) {
+      findxy("up", e);
+    }
   };
   const mouseOut = (e: MouseEvent): void => {
-    findxy("out", e);
+    if (!isDrawingFinished) {
+      findxy("out", e);
+    }
   };
 
   const findxy = (res: String, e: MouseEvent): void => {
@@ -68,6 +85,9 @@ export const useDrawing = (canvasRef: HTMLCanvasElement | null, pencilColor : st
         prevY.current = firstY.current;
         isDrawing.current = false;
         draw();
+        if (setIsDrawingFinished && res === "up") {
+          setIsDrawingFinished(true);
+        }
       }
       if (res === "move") {
         if (isDrawing.current) {
