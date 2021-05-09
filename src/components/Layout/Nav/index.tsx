@@ -16,7 +16,9 @@ const Nav = () => {
     setMessagesColor,
     setMessagesText,
     setSecondsDrawing,
-    breakInterval
+    breakInterval,
+    setCoordenatesArray,
+    setRestartCoordenates,
   } = useContext(GlobalContext);
 
   const [isMobile, setIsMobile] = useState<boolean>(false);
@@ -35,9 +37,15 @@ const Nav = () => {
             onClick={() => {
               if (setIsCanvasNeedToClear) {
                 setIsCanvasNeedToClear(true);
-                if (setSecondsDrawing && breakInterval) {
+                if (
+                  setSecondsDrawing &&
+                  breakInterval &&
+                  setCoordenatesArray &&
+                  setRestartCoordenates
+                ) {
                   breakInterval();
-                  setSecondsDrawing(0)
+                  setRestartCoordenates(true);
+                  setSecondsDrawing(0);
                 }
               }
             }}

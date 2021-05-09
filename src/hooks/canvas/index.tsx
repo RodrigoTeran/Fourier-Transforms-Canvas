@@ -3,6 +3,10 @@ import { useLayoutEffect, useRef, useState, useContext } from "react";
 // App Context
 import { GlobalContext } from "../../App";
 
+import { useGetCoordenates } from "./getCoordenates";
+// Helpers
+import { round, findSlope } from "../../helpers/index";
+
 interface PropsDrawingHook {
   (canvasRef: HTMLCanvasElement | null, pencilColor: string): void;
 }
@@ -24,6 +28,8 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
 
   const ctx = useRef<CanvasRenderingContext2D | null>(null);
   const [rerender, setRerender] = useState<boolean>(false);
+
+  const [pushCoordenate, changeGlobalCoordenates] = useGetCoordenates();
 
   const isDrawing = useRef<boolean>(false);
   const prevX = useRef<number>(0);
@@ -73,7 +79,7 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
         finishMovement();
       }
       setMessagesColor("#000");
-      if (secondsDrawing !== undefined) {
+      if (secondsDrawing !== undefined && !isDrawingFinished) {
         var time: number | string = secondsDrawing.toFixed();
         time = parseInt(time);
         time = MAX_TIME - time;
@@ -133,6 +139,13 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
           currX.current = e.clientX - canvasRef.getBoundingClientRect().left;
           currY.current = e.clientY - canvasRef.getBoundingClientRect().top;
           draw();
+
+          // push cooordenates
+          pushCoordenate({
+            x: currX.current,
+            y: currY.current,
+            t: secondsDrawing,
+          });
         }
       }
     }
@@ -140,15 +153,60 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
 
   const finishMovement = (): void => {
     if (setIsDrawingFinished && isDrawing.current) {
-      prevX.current = firstX.current;
-      prevY.current = firstY.current;
-      draw();
+      const diiferenceIterations = 0.01;
+      const speedInterval = 1;
+
+      // y = -> [m] x + b
+      // (y2 - y1) / (x2 - x1)
+      var slope = 0;
+      slope = findSlope(
+        firstX.current,
+        firstY.current,
+        currX.current,
+        currY.current
+      );
+      // y = mx + -> [b]
+      const b = firstY.current - slope * firstX.current;
+      // sum iteration or restate ?
+      const isSum = firstX.current >= currX.current ? true : false;
+
+      // y = m -> [x] + b
+      var iteration = 0;
+      isDrawing.current = false;
       setIsDrawingFinished(true);
-      if (breakInterval) {
-        breakInterval();
-      }
+      const itervalLastMove = setInterval(() => {
+        if (
+          (isSum && firstX.current <= currX.current) ||
+          (!isSum && firstX.current >= currX.current)
+        ) {
+          clearInterval(itervalLastMove);
+          if (breakInterval) {
+            breakInterval();
+          }
+          // end coordenates
+          changeGlobalCoordenates();
+        } else {
+          iteration = iteration + diiferenceIterations;
+          prevX.current = currX.current;
+          prevY.current = currY.current;
+
+          currX.current = isSum
+            ? currX.current + iteration
+            : currX.current - iteration;
+          currY.current = currX.current * slope + b;
+          draw();
+
+          // push cooordenates
+          if (secondsDrawing) {
+            pushCoordenate({
+              x: currX.current,
+              y: currY.current,
+              t: round(secondsDrawing + iteration),
+            });
+          }
+        }
+      }, speedInterval);
     }
-    isDrawing.current = false;
   };
 
   const draw = (): void => {

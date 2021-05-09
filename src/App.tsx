@@ -29,6 +29,12 @@ interface ValueAppProvider {
   startInterval: () => void;
   secondsDrawing: number;
   setSecondsDrawing: Dispatch<SetStateAction<number>>;
+
+  // Coordenates
+  coordenatesArray: Array<Object>;
+  setCoordenatesArray: Dispatch<SetStateAction<Array<Object>>>;
+  restartCoordenates: boolean;
+  setRestartCoordenates: Dispatch<SetStateAction<boolean>>;
 }
 
 const App = () => {
@@ -52,6 +58,10 @@ const App = () => {
     10
   );
 
+  // Coordenates
+  const [coordenatesArray, setCoordenatesArray] = useState<Array<Object>>([]);
+  const [restartCoordenates, setRestartCoordenates] = useState<boolean>(false);
+
   return (
     <GlobalContext.Provider
       value={{
@@ -72,6 +82,12 @@ const App = () => {
         startInterval: startInterval,
         setSecondsDrawing: setSecondsDrawing,
         secondsDrawing: secondsDrawing,
+
+        // Coordenates
+        coordenatesArray: coordenatesArray,
+        setCoordenatesArray: setCoordenatesArray,
+        restartCoordenates: restartCoordenates,
+        setRestartCoordenates: setRestartCoordenates,
       }}
     >
       <Nav></Nav>
