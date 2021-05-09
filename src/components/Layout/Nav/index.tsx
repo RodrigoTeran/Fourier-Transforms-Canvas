@@ -56,8 +56,8 @@ const Nav = () => {
         <button
           onClick={() => {
             if (setMessagesText && setMessagesColor && !isDrawingFinished) {
-              setMessagesText("First you need to draw something in the canvas");
               setMessagesColor("#F00");
+              setMessagesText("First you need to draw something in the canvas");
             }
           }}
         >

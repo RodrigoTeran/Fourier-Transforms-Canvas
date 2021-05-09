@@ -29,6 +29,8 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
   const ctx = useRef<CanvasRenderingContext2D | null>(null);
   const [rerender, setRerender] = useState<boolean>(false);
 
+  const [isDrawingFinishedLocal, setIsDrawingFinishedLocal] = useState<boolean>(false);
+
   const [pushCoordenate, changeGlobalCoordenates] = useGetCoordenates();
 
   const isDrawing = useRef<boolean>(false);
@@ -78,14 +80,15 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
       if (secondsDrawing && secondsDrawing >= MAX_TIME) {
         finishMovement();
       }
-      setMessagesColor("#000");
-      if (secondsDrawing !== undefined && !isDrawingFinished) {
+      if (secondsDrawing !== undefined && !isDrawingFinishedLocal) {
         var time: number | string = secondsDrawing.toFixed();
         time = parseInt(time);
         time = MAX_TIME - time;
         if (secondsDrawing === 0) {
+          setMessagesColor("#000");
           setMessagesText(`Draw something :)`);
         } else {
+          setMessagesColor("#000");
           setMessagesText(`Time remaining to draw: ${time}`);
         }
       }
@@ -93,12 +96,12 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
   };
 
   const mouseMove = (e: MouseEvent): void => {
-    if (!isDrawingFinished) {
+    if (!isDrawingFinished && !isDrawingFinishedLocal) {
       findxy("move", e);
     }
   };
   const mouseDown = (e: MouseEvent): void => {
-    if (!isDrawingFinished) {
+    if (!isDrawingFinished && !isDrawingFinishedLocal) {
       if (startInterval) {
         updateTime();
         startInterval();
@@ -107,12 +110,12 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
     }
   };
   const mouseUp = (e: MouseEvent): void => {
-    if (!isDrawingFinished) {
+    if (!isDrawingFinished && !isDrawingFinishedLocal) {
       findxy("up", e);
     }
   };
   const mouseOut = (e: MouseEvent): void => {
-    if (!isDrawingFinished) {
+    if (!isDrawingFinished && !isDrawingFinishedLocal) {
       findxy("out", e);
     }
   };
@@ -173,7 +176,7 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
       // y = m -> [x] + b
       var iteration = 0;
       isDrawing.current = false;
-      setIsDrawingFinished(true);
+      setIsDrawingFinishedLocal(true);
       const itervalLastMove = setInterval(() => {
         if (
           (isSum && firstX.current <= currX.current) ||
@@ -185,6 +188,7 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
           }
           // end coordenates
           changeGlobalCoordenates();
+          setIsDrawingFinished(true);
         } else {
           iteration = iteration + diiferenceIterations;
           prevX.current = currX.current;
@@ -227,6 +231,7 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
       if (setIsCanvasNeedToClear && setIsDrawingFinished) {
         setIsCanvasNeedToClear(false);
         setIsDrawingFinished(false);
+        setIsDrawingFinishedLocal(false);
       }
     }
   };
