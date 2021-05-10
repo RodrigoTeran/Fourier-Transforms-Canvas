@@ -22,7 +22,6 @@ export const useGetCoordenates: Hook = () => {
   const changeGlobal = (): void => {
     if (setCoordenatesArray) {
       setCoordenatesArray(arrayCoordenates.current);
-      // console.log(arrayCoordenates.current);
     }
   };
 

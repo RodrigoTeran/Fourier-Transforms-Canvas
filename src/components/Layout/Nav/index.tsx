@@ -5,6 +5,7 @@ import styles from "../../../styles/layout/nav.module.scss";
 
 // Hooks
 import { useIsMobile } from "../../../hooks/layout/index";
+import { useCoordenates } from "../../../hooks/math/index";
 
 // App Context
 import { GlobalContext } from "../../../App";
@@ -23,6 +24,8 @@ const Nav = () => {
 
   const [isMobile, setIsMobile] = useState<boolean>(false);
   useIsMobile(setIsMobile);
+
+  const [comb] = useCoordenates();
 
   return (
     <nav className={styles.nav}>
@@ -57,6 +60,8 @@ const Nav = () => {
             if (setMessagesText && setMessagesColor && !isDrawingFinished) {
               setMessagesColor("#F00");
               setMessagesText("First you need to draw something in the canvas");
+            } else {
+              comb();
             }
           }}
         >
