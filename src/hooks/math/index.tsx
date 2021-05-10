@@ -45,6 +45,8 @@ export const useCoordenates: Coordenates = () => {
       -> f(t) = # + #i
       -> delta_t = 0.01
       -> HOW_MANY_VECTORS = 50
+      -> e^(b + ci) = e^b * e^(ci)
+      -> e^ci = cos(c) + sin(c)i
 
       1. sumar todos los valores de 
           sum_n = f(t) e^ (-2 n PI i t ) * delta_t
@@ -55,6 +57,10 @@ export const useCoordenates: Coordenates = () => {
 
       3. el c_n debería de estar en la forma
           # + #i
+          {
+            real: #
+            imaginary: #
+          }
       4. repetir los pasos del (1-3) con los valores de n:
           -HOW_MANY_VECTORS / 2 <= n <= HOW_MANY_VECTORS / 2   # o sea 101 veces
 
@@ -73,7 +79,69 @@ export const useCoordenates: Coordenates = () => {
   };
 
   const renderVectors = () => {
-    /* 
+    /*
+      -> debemos de tener dos canvas
+        - este canvas debe estar en posicion absoluta. Esto tambien prevee el drawing del canvas
+          drawing
+
+      1. crear un loop infinito
+      2. hacer un loop en el array de los coeficientes dentro del loop infinito
+      3. multiplicar el coeficiente por:
+        c_n = (array[i].real + array[i].imaginary)
+        n = array[i].frequency
+        t = dentro del loop infinito podemos sacar el contador
+        posicionFinalDeLaLinea_n = c_n e ^ (n * 2 PI i t)
+        --> convertir a este formato:
+                      {
+                          real: #
+                          imaginary: #
+                      }
+        if n == 0:
+          posicionInicialDeLaLinea_n = {
+            real: 0,
+            imaginary: 0
+          }
+
+          metemos al array Posiciones:
+          [
+            ...,
+            {
+              posFinal: posicionFinalDeLaLinea_n,
+              posInicial: posicionInicialDeLaLinea_n
+            }
+          ]
+        else:
+          # --conceptual-- posicionInicialDeLaLinea_n = posicionFinalDeLaLinea_(n-1)
+
+          metemos al array Posiciones:
+          [
+            ...,
+            {
+              posFinal: posicionFinalDeLaLinea_n,
+              posInicial: arrayPosiciones[i - 1].posFinal
+            }
+          ]
+      4. borrar el canvas
+
+      5. hacemos loop en el array arrayPosiciones:
+        y simple hacemos esto
+        ctx.current.beginPath();
+        ctx.current.moveTo(
+          valueToCoordenateX(arrayPosiciones[i].posInicial.real),
+          valueToCoordenateY(arrayPosiciones[i].posInicial.imaginary),
+        );
+        ctx.current.lineTo(
+          valueToCoordenateX(arrayPosiciones[i].posFinal.real),
+          valueToCoordenateY(arrayPosiciones[i].posFinal.imaginary),
+        );
+        ctx.current.strokeStyle = "#00F";  # un azul oscuro
+        ctx.current.lineWidth = 1;  -> para que sean más delgadas
+        ctx.current.stroke();
+        ctx.current.closePath();
+
+        -> OJO con "valueToCoordenateX" y "valueToCoordenateY"...necesitamos los valores en coordenadas
+        tipo canvas
+      6. se repite pasos (3-5)
     */
   };
 
