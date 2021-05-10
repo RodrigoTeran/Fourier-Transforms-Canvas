@@ -1,9 +1,9 @@
 import { useRef, useContext, useEffect } from "react";
 
-import { GlobalContext } from "../../App";
+import { GlobalContext, ObjectForCoordenates } from "../../App";
 
 interface Hook {
-  (): [(coordenate: Object) => void, () => void];
+  (): [(coordenate: ObjectForCoordenates) => void, () => void];
 }
 
 export const useGetCoordenates: Hook = () => {
@@ -13,16 +13,17 @@ export const useGetCoordenates: Hook = () => {
     setRestartCoordenates,
   } = useContext(GlobalContext);
 
-  const arrayCoordenates = useRef<Array<Object>>([]);
+  const arrayCoordenates = useRef<Array<ObjectForCoordenates>>([]);
 
-  const pushCoordenates = (coordenate: Object): void => {
+  const pushCoordenates = (coordenate: ObjectForCoordenates): void => {
     arrayCoordenates.current.push(coordenate);
   };
 
   const changeGlobal = (): void => {
     if (setCoordenatesArray) {
       setCoordenatesArray(arrayCoordenates.current);
-    };
+      // console.log(arrayCoordenates.current);
+    }
   };
 
   useEffect(() => {
@@ -40,7 +41,7 @@ export const useGetCoordenates: Hook = () => {
   };
 
   return [
-    (coordenate: Object) => {
+    (coordenate: ObjectForCoordenates) => {
       // push coordenate
       pushCoordenates(coordenate);
     },

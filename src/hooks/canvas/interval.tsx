@@ -31,12 +31,11 @@ export const useInterval: PropsInterval = (setSeconds, seconds, difference) => {
       clearInterval(interval.current);
       setIsStartingInterval(false);
       interval.current = undefined;
+      setSeconds(0);
     },
     () => {
       // Start
-      if (seconds !== 0) {
-        setSeconds(0);
-      }
+      setSeconds(0);
       setIsStartingInterval(true);
     },
   ];

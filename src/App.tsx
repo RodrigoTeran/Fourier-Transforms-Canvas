@@ -11,6 +11,12 @@ import { useInterval } from "./hooks/canvas/interval";
 
 export const GlobalContext = createContext<Partial<ValueAppProvider>>({});
 
+export type ObjectForCoordenates = {
+  real: number;
+  imaginary: number;
+  time: number;
+};
+
 interface ValueAppProvider {
   // Canvas Drawing
   isDrawingFinished: boolean;
@@ -32,7 +38,7 @@ interface ValueAppProvider {
 
   // Coordenates
   coordenatesArray: Array<Object>;
-  setCoordenatesArray: Dispatch<SetStateAction<Array<Object>>>;
+  setCoordenatesArray: Dispatch<SetStateAction<Array<ObjectForCoordenates>>>;
   restartCoordenates: boolean;
   setRestartCoordenates: Dispatch<SetStateAction<boolean>>;
 }
@@ -59,7 +65,9 @@ const App = () => {
   );
 
   // Coordenates
-  const [coordenatesArray, setCoordenatesArray] = useState<Array<Object>>([]);
+  const [coordenatesArray, setCoordenatesArray] = useState<
+    Array<ObjectForCoordenates>
+  >([]);
   const [restartCoordenates, setRestartCoordenates] = useState<boolean>(false);
 
   return (

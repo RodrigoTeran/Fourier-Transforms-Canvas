@@ -29,7 +29,9 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
   const ctx = useRef<CanvasRenderingContext2D | null>(null);
   const [rerender, setRerender] = useState<boolean>(false);
 
-  const [isDrawingFinishedLocal, setIsDrawingFinishedLocal] = useState<boolean>(false);
+  const [isDrawingFinishedLocal, setIsDrawingFinishedLocal] = useState<boolean>(
+    false
+  );
 
   const [pushCoordenate, changeGlobalCoordenates] = useGetCoordenates();
 
@@ -144,13 +146,47 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
           draw();
 
           // push cooordenates
-          pushCoordenate({
-            x: currX.current,
-            y: currY.current,
-            t: secondsDrawing,
-          });
+          if (secondsDrawing !== undefined) {
+            pushCoordenateInRelationCenter(
+              currX.current,
+              currY.current,
+              secondsDrawing
+            );
+          }
         }
       }
+    }
+  };
+
+  const pushCoordenateInRelationCenter = (
+    real: number,
+    imaginary: number,
+    time: number
+  ) => {
+    /*
+      you pass a normal x and y from canvas...
+      and it transforms those values to real and imaginary numbers
+    */
+    if (canvasRef) {
+      // x
+      var real_2: number, imaginary_2: number;
+      if (canvasRef.width / 2 <= real) {
+        real_2 = real - canvasRef.width / 2;
+      } else {
+        real_2 = (canvasRef.width / 2 - real) * -1;
+      }
+
+      if (canvasRef.height / 2 <= imaginary) {
+        imaginary_2 = (imaginary - canvasRef.height / 2) * -1;
+      } else {
+        imaginary_2 = canvasRef.height / 2 - imaginary;
+      }
+
+      pushCoordenate({
+        real: real_2,
+        imaginary: imaginary_2,
+        time,
+      });
     }
   };
 
@@ -201,12 +237,12 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
           draw();
 
           // push cooordenates
-          if (secondsDrawing) {
-            pushCoordenate({
-              x: currX.current,
-              y: currY.current,
-              t: round(secondsDrawing + iteration),
-            });
+          if (secondsDrawing !== undefined) {
+            pushCoordenateInRelationCenter(
+              currX.current,
+              currY.current,
+              round(secondsDrawing + iteration)
+            );
           }
         }
       }, speedInterval);
@@ -229,9 +265,9 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
     if (canvasRef && ctx.current) {
       ctx.current.clearRect(0, 0, canvasRef.width, canvasRef.height);
       if (setIsCanvasNeedToClear && setIsDrawingFinished) {
-        setIsCanvasNeedToClear(false);
-        setIsDrawingFinished(false);
         setIsDrawingFinishedLocal(false);
+        setIsDrawingFinished(false);
+        setIsCanvasNeedToClear(false);
       }
     }
   };

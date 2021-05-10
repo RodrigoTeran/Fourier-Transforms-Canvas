@@ -35,18 +35,17 @@ const Nav = () => {
         {isDrawingFinished && (
           <button
             onClick={() => {
-              if (setIsCanvasNeedToClear) {
+              if (
+                setIsCanvasNeedToClear &&
+                setSecondsDrawing &&
+                breakInterval &&
+                setCoordenatesArray &&
+                setRestartCoordenates
+              ) {
                 setIsCanvasNeedToClear(true);
-                if (
-                  setSecondsDrawing &&
-                  breakInterval &&
-                  setCoordenatesArray &&
-                  setRestartCoordenates
-                ) {
-                  breakInterval();
-                  setRestartCoordenates(true);
-                  setSecondsDrawing(0);
-                }
+                breakInterval();
+                setRestartCoordenates(true);
+                setSecondsDrawing(0);
               }
             }}
           >
