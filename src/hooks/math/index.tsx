@@ -4,6 +4,9 @@ import { GlobalContext, ObjectForCoordenates } from "../../App";
 
 import { round } from "../../helpers/index";
 
+// Math.js
+import { Complex, pow, add, multiply, complex, divide } from "mathjs";
+
 type ObjectForCoefficients = {
   real: number;
   imaginary: number;
@@ -34,15 +37,40 @@ export const useCoordenates: Coordenates = () => {
       you pass a complex number,
       and it transforms those values to x and y coordenates
     */
-    // console.log("real: ", real);
 
     if (canvasRef) {
       var x: number, y: number;
       x = canvasRef.width / 2 + real;
       y = canvasRef.height / 2 - imaginary;
-      // console.log("x: ", x);
-
       return { x, y };
+    }
+  };
+
+  const pushCoordenateInRelationCenter = (
+    x: number,
+    y: number,
+    canvasRef: HTMLCanvasElement | null
+  ) => {
+    /*
+      you pass a normal x and y from canvas...
+      and it transforms those values to real and imaginary numbers
+    */
+    if (canvasRef) {
+      // x
+      var real: number, imaginary: number;
+      if (canvasRef.width / 2 <= x) {
+        real = x - canvasRef.width / 2;
+      } else {
+        real = (canvasRef.width / 2 - x) * -1;
+      }
+
+      if (canvasRef.height / 2 <= y) {
+        imaginary = (y - canvasRef.height / 2) * -1;
+      } else {
+        imaginary = canvasRef.height / 2 - y;
+      }
+
+      return { real, imaginary };
     }
   };
 
@@ -71,40 +99,34 @@ export const useCoordenates: Coordenates = () => {
   const calculateCoefficients = (
     arrayCoordenatesUpdated: Array<ObjectForCoordenates>
   ): void => {
-    // coordenatesArray
     if (coordenatesArray) {
-      var HOW_MANY_VECTORS: number = 2;
+      var HOW_MANY_VECTORS: number = 60;
       var delta_t: number = 0.01;
 
       for (var n = -HOW_MANY_VECTORS / 2; n <= HOW_MANY_VECTORS / 2; n++) {
         // -HOW_MANY_VECTORS / 2 <= n <= HOW_MANY_VECTORS / 2
-        var sum_n_real: number = 0;
-        var sum_n_imaginary: number = 0;
+        var sum_n: any = complex(0, 0);
         for (var i = 0; i < arrayCoordenatesUpdated.length; i++) {
           // 0 <= t <= "largest value of t"
-          var real: number = arrayCoordenatesUpdated[i].real;
-          var imaginary: number = arrayCoordenatesUpdated[i].imaginary;
           var time: number = arrayCoordenatesUpdated[i].time;
 
-          sum_n_real =
-            sum_n_real +
-            (delta_t * real * Math.cos(-2 * n * Math.PI * time) -
-              delta_t * imaginary * Math.sin(-2 * n * Math.PI * time));
+          // f(time)
+          var complexNumber: Complex = complex(
+            arrayCoordenatesUpdated[i].real,
+            arrayCoordenatesUpdated[i].imaginary
+          );
 
-          sum_n_imaginary =
-            sum_n_imaginary +
-            (delta_t * real * Math.sin(-2 * n * Math.PI * time) +
-              delta_t * imaginary * Math.cos(-2 * n * Math.PI * time));
+          var exponent: any = complex(0, -2 * n * Math.PI * time);
+          var elevation: any = pow(Math.E, exponent);
+          sum_n = add(
+            sum_n,
+            multiply(complexNumber, multiply(delta_t, elevation))
+          );
         }
-
-        // Dividir: c_n = sum_n / "largest value of t"
-
-        // sum_n_real =
-        //   sum_n_real /
-        //   arrayCoordenatesUpdated[arrayCoordenatesUpdated.length - 1].time;
-        // sum_n_imaginary =
-        //   sum_n_imaginary /
-        //   arrayCoordenatesUpdated[arrayCoordenatesUpdated.length - 1].time;
+        sum_n = divide(
+          sum_n,
+          arrayCoordenatesUpdated[arrayCoordenatesUpdated.length - 1].time
+        );
 
         /* 
           -> siendo los valores de n asi: 0, 1, -1, 2, -2, 3, -3, ... n, -n
@@ -112,21 +134,20 @@ export const useCoordenates: Coordenates = () => {
         if (n <= 0) {
           arrayCoefficients.current = [
             {
-              real: sum_n_real,
-              imaginary: sum_n_imaginary,
+              real: sum_n.re,
+              imaginary: sum_n.im,
               frequency: n,
             },
             ...arrayCoefficients.current,
           ];
         } else {
           arrayCoefficients.current.splice(n * 2 - 1, 0, {
-            real: sum_n_real,
-            imaginary: sum_n_imaginary,
+            real: sum_n.re,
+            imaginary: sum_n.im,
             frequency: n,
           });
         }
       }
-      console.log(arrayCoefficients.current);
     }
   };
 
@@ -134,22 +155,41 @@ export const useCoordenates: Coordenates = () => {
     canvasAnimationsRef: HTMLCanvasElement | null,
     canvasRef: HTMLCanvasElement | null
   ): void => {
+    // var exponent_1: any = complex(0, Math.PI * 0.5);
+    // var elevation_1: any = pow(Math.E, exponent_1);
+
+    // var exponent_2: any = complex(0, Math.PI * 0.25);
+    // var elevation_2: any = pow(Math.E, exponent_2);
+    // arrayCoefficients.current = [
+    //   {
+    //     real: multiply(100, elevation_1),
+    //     imaginary: 0,
+    //     frequency: -1,
+    //   },
+    //   {
+    //     real: multiply(50, elevation_2),
+    //     imaginary: 0,
+    //     frequency: 1,
+    //   },
+    //   {
+    //     real: multiply(25, elevation_1),
+    //     imaginary: 0,
+    //     frequency: -.5,
+    //   },
+    // ];
     if (canvasAnimationsRef && canvasRef) {
-      var speedInterval: number = 100;
+      var speedInterval: number = 50;
       var timer: number = 0;
 
-      var startPos_real_previous: number = 0;
-      var startPos_imaginary_previous: number = 0;
+      var startPos_previous: any = complex(0, 0);
 
-      var ctx = canvasAnimationsRef.getContext("2d");
-      var ctx_2 = canvasRef.getContext("2d");
+      var ctx = canvasAnimationsRef.getContext("2d"); // Canvas of Vectors
+      var ctx_2 = canvasRef.getContext("2d"); // Canvas of green line
 
       const interval = setInterval(() => {
         // clearInterval(interval);
-        // Clear Canvas
-        var startPos_real: number = canvasAnimationsRef.width / 2;
-        var startPos_imaginary: number = canvasAnimationsRef.height / 2;
         if (ctx) {
+          // Clear canvas of vectors
           ctx.clearRect(
             0,
             0,
@@ -158,57 +198,49 @@ export const useCoordenates: Coordenates = () => {
           );
         }
 
+        // ----------------------> Render Vectors
+        var startPos: any = {
+          re: canvasAnimationsRef.width / 2,
+          im: canvasAnimationsRef.height / 2,
+        };
+
         for (var i = 0; i < arrayCoefficients.current.length; i++) {
-          var coefficient_real: number = arrayCoefficients.current[i].real;
-          var coefficient_imaginary: number =
-            arrayCoefficients.current[i].imaginary;
-          var coefficient_frequency: number =
-            arrayCoefficients.current[i].frequency;
+          var coefficient = complex(
+            arrayCoefficients.current[i].real,
+            arrayCoefficients.current[i].imaginary
+          );
 
-          var finalPos_real: number =
-            coefficient_real *
-              Math.cos(2 * coefficient_frequency * Math.PI * timer) -
-            coefficient_imaginary *
-              Math.sin(2 * coefficient_frequency * Math.PI * timer);
+          var n: number = arrayCoefficients.current[i].frequency;
 
-          var finalPos_imaginary: number =
-            coefficient_real *
-              Math.sin(2 * coefficient_frequency * Math.PI * timer) +
-            coefficient_imaginary *
-              Math.cos(2 * coefficient_frequency * Math.PI * timer);
+          var exponent: any = complex(0, 2 * n * Math.PI * timer);
+          var elevation: any = pow(Math.E, exponent);
+          var finalPos: any = multiply(coefficient, elevation);
 
-          // if (coefficient_frequency === 0) {
-          //   console.log(
-          //     coefficient_real *
-          //       Math.sin(2 * coefficient_frequency * Math.PI * timer)
-          //   );
-          //   console.log(
-          //     coefficient_imaginary *
-          //       Math.cos(2 * coefficient_frequency * Math.PI * timer)
-          //   );
-          //   console.log("finalPos_imaginary: ", finalPos_imaginary);
-          //   console.log("coefficient_imaginary: ", coefficient_imaginary);
-          // }
+          // var exponent: any = complex(0, 2 * -1 * Math.PI * timer);
+          // var elevation: any = pow(Math.E, exponent);
+
+          // var finalPos: any = multiply(coefficient, elevation);
 
           var coordenatesInRelationCanvas = pushCoordenateInRelationCanvas(
-            finalPos_real,
-            finalPos_imaginary,
+            finalPos.re,
+            finalPos.im,
             canvasAnimationsRef
           );
 
-          if (ctx && coordenatesInRelationCanvas) {
-            // console.log(
-            //   "coordenatesInRelationCanvas.x: ",
-            //   coordenatesInRelationCanvas.x
-            // );
+          var coordenatesForSum = pushCoordenateInRelationCenter(
+            startPos.re,
+            startPos.im,
+            canvasAnimationsRef
+          );
 
+          if (ctx && coordenatesInRelationCanvas && coordenatesForSum) {
             ctx.beginPath();
-            ctx.moveTo(startPos_real, startPos_imaginary);
+            ctx.moveTo(startPos.re, startPos.im);
             ctx.lineTo(
-              coordenatesInRelationCanvas.x,
-              coordenatesInRelationCanvas.y
+              coordenatesInRelationCanvas.x + coordenatesForSum.real,
+              coordenatesInRelationCanvas.y - coordenatesForSum.imaginary
             );
-            if (coefficient_frequency === 0) {
+            if (n === 0) {
               ctx.strokeStyle = "#F00";
             } else {
               ctx.strokeStyle = "#FFF";
@@ -217,32 +249,28 @@ export const useCoordenates: Coordenates = () => {
             ctx.stroke();
             ctx.closePath();
 
-            startPos_real = coordenatesInRelationCanvas.x;
-            startPos_imaginary = coordenatesInRelationCanvas.y;
+            startPos.re =
+              coordenatesInRelationCanvas.x + coordenatesForSum.real;
+            startPos.im =
+              coordenatesInRelationCanvas.y - coordenatesForSum.imaginary;
           }
         }
 
         if (ctx_2 && coordenatesInRelationCanvas && timer !== 0) {
           ctx_2.beginPath();
-          ctx_2.moveTo(startPos_real_previous, startPos_imaginary_previous);
-          ctx_2.lineTo(startPos_real, startPos_imaginary);
+          ctx_2.moveTo(startPos_previous.re, startPos_previous.im);
+          ctx_2.lineTo(startPos.re, startPos.im);
           ctx_2.strokeStyle = "#0F0";
           ctx_2.lineWidth = 1;
           ctx_2.stroke();
           ctx_2.closePath();
-
-          startPos_real = coordenatesInRelationCanvas.x;
-          startPos_imaginary = coordenatesInRelationCanvas.y;
         }
 
         // Update values
-        startPos_real_previous = startPos_real;
-        startPos_imaginary_previous = startPos_imaginary;
+        startPos_previous.re = startPos.re;
+        startPos_previous.im = startPos.im;
 
         timer = round(timer + 0.01);
-        // if (timer >= 0.3) {
-        //   clearInterval(interval);
-        // }
       }, speedInterval);
     }
   };
