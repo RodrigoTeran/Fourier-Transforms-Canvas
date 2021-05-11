@@ -1,6 +1,8 @@
-import { useContext } from "react";
+import { useContext, useRef } from "react";
 
 import { GlobalContext, ObjectForCoordenates } from "../../App";
+
+import { round } from "../../helpers/index";
 
 interface Coordenates {
   (): [() => void];
@@ -9,73 +11,88 @@ interface Coordenates {
 export const useCoordenates: Coordenates = () => {
   const { coordenatesArray, setCoordenatesArray } = useContext(GlobalContext);
 
+  const arrayCoefficients = useRef<Array<Object>>([]);
+
   const combValuesOfTime = () => {
     if (coordenatesArray) {
       var newArrayCoordenates: Array<ObjectForCoordenates> = [];
+      var timeNow: number = 0;
       for (var i = 0; i < coordenatesArray.length; i++) {
-        var timeNow: number;
         var oNow: any = coordenatesArray[i];
-        if (i === 0) {
-          timeNow = oNow.time;
-          newArrayCoordenates.push({
-            real: oNow.real,
-            imaginary: oNow.imaginary,
-            time: timeNow,
-          });
-        } else {
-          var oBefore: any = coordenatesArray[i - 1];
-          if (oBefore.time !== oNow.time) {
-            timeNow = oNow.time;
-            newArrayCoordenates.push({
-              real: oNow.real,
-              imaginary: oNow.imaginary,
-              time: timeNow,
-            });
-          }
-        }
+        newArrayCoordenates.push({
+          real: oNow.real,
+          imaginary: oNow.imaginary,
+          time: timeNow,
+        });
+        timeNow = round(timeNow + 0.01);
       }
       if (setCoordenatesArray) {
         setCoordenatesArray(newArrayCoordenates);
+
+        // Calcular coeficientes
+        calculateCoefficients(newArrayCoordenates);
       }
     }
   };
 
-  const calculateCoefficients = () => {
-    /* 
-      -> f(t) = # + #i
-      -> delta_t = 0.01
-      -> HOW_MANY_VECTORS = 50
-      -> e^(b + ci) = e^b * e^(ci)
-      -> e^ci = cos(c) + sin(c)i
+  const calculateCoefficients = (
+    arrayCoordenatesUpdated: Array<ObjectForCoordenates>
+  ) => {
+    // coordenatesArray
+    if (coordenatesArray) {
+      var HOW_MANY_VECTORS: number = 50;
+      var delta_t: number = 0.01;
 
-      1. sumar todos los valores de 
-          sum_n = f(t) e^ (-2 n PI i t ) * delta_t
+      for (var n = -HOW_MANY_VECTORS / 2; n <= HOW_MANY_VECTORS / 2; n++) {
+        // -HOW_MANY_VECTORS / 2 <= n <= HOW_MANY_VECTORS / 2
+        var sum_n_real: number = 0;
+        var sum_n_imaginary: number = 0;
+        for (var i = 0; i < arrayCoordenatesUpdated.length; i++) {
+          // 0 <= t <= "largest value of t"
+          var real: number = arrayCoordenatesUpdated[i].real;
+          var imaginary: number = arrayCoordenatesUpdated[i].imaginary;
+          var time: number = arrayCoordenatesUpdated[i].time;
 
-          0 <= t <= "largest value of t"
-      2. luego sacar promedio dividiendo
-          c_n = sum_n / "largest value of t"
+          sum_n_real =
+            sum_n_real +
+            (delta_t * real * Math.cos(-2 * n * Math.PI * time) -
+              delta_t * imaginary * Math.sin(-2 * n * Math.PI * time));
 
-      3. el c_n debería de estar en la forma
-          # + #i
-          {
-            real: #
-            imaginary: #
-          }
-      4. repetir los pasos del (1-3) con los valores de n:
-          -HOW_MANY_VECTORS / 2 <= n <= HOW_MANY_VECTORS / 2   # o sea 101 veces
+          sum_n_imaginary =
+            sum_n_imaginary +
+            (delta_t * real * Math.sin(-2 * n * Math.PI * time) +
+              delta_t * imaginary * Math.cos(-2 * n * Math.PI * time));
+        }
 
-      5. Poner todos los coeficientes ( c_n ) en un array de objetos:
-        [ 
-          ...,
-          {
+        // Dividir: c_n = sum_n / "largest value of t"
+        sum_n_real =
+          sum_n_real /
+          arrayCoordenatesUpdated[arrayCoordenatesUpdated.length - 1].time;
+        sum_n_imaginary =
+          sum_n_imaginary /
+          arrayCoordenatesUpdated[arrayCoordenatesUpdated.length - 1].time;
+
+        /* 
+          -> siendo los valores de n asi: 0, 1, -1, 2, -2, 3, -3, ... n, -n
+        */
+        if (n <= 0) {
+          arrayCoefficients.current = [
+            {
+              real: sum_n_real,
+              imaginary: sum_n_imaginary,
+              frequency: n,
+            },
+            ...arrayCoefficients.current,
+          ];
+        } else {
+          arrayCoefficients.current.splice(n * 2 - 1, 0, {
+            real: sum_n_real,
+            imaginary: sum_n_imaginary,
             frequency: n,
-            real: #,
-            imaginary: #
-          }
-        ]
-
-        -> siendo los valores de n asi: 0, 1, -1, 2, -2, 3, -3, ... n, -n
-    */
+          });
+        }
+      }
+    }
   };
 
   const renderVectors = () => {
