@@ -41,6 +41,10 @@ interface ValueAppProvider {
   setCoordenatesArray: Dispatch<SetStateAction<Array<ObjectForCoordenates>>>;
   restartCoordenates: boolean;
   setRestartCoordenates: Dispatch<SetStateAction<boolean>>;
+
+  // Is Canvas Animations
+  isCanvasAnimations: boolean;
+  setIsCanvasAnimations: Dispatch<SetStateAction<boolean>>;
 }
 
 const App = () => {
@@ -70,6 +74,9 @@ const App = () => {
   >([]);
   const [restartCoordenates, setRestartCoordenates] = useState<boolean>(false);
 
+  // Is Canvas Animations
+  const [isCanvasAnimations, setIsCanvasAnimations] = useState<boolean>(false);
+
   return (
     <GlobalContext.Provider
       value={{
@@ -96,6 +103,10 @@ const App = () => {
         setCoordenatesArray: setCoordenatesArray,
         restartCoordenates: restartCoordenates,
         setRestartCoordenates: setRestartCoordenates,
+
+        // Is Canvas Animations
+        isCanvasAnimations: isCanvasAnimations,
+        setIsCanvasAnimations: setIsCanvasAnimations,
       }}
     >
       <Nav></Nav>

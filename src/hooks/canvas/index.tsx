@@ -159,8 +159,8 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
   };
 
   const pushCoordenateInRelationCenter = (
-    real: number,
-    imaginary: number,
+    x: number,
+    y: number,
     time: number
   ) => {
     /*
@@ -170,16 +170,16 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
     if (canvasRef) {
       // x
       var real_2: number, imaginary_2: number;
-      if (canvasRef.width / 2 <= real) {
-        real_2 = real - canvasRef.width / 2;
+      if (canvasRef.width / 2 <= x) {
+        real_2 = x - canvasRef.width / 2;
       } else {
-        real_2 = (canvasRef.width / 2 - real) * -1;
+        real_2 = (canvasRef.width / 2 - x) * -1;
       }
 
-      if (canvasRef.height / 2 <= imaginary) {
-        imaginary_2 = (imaginary - canvasRef.height / 2) * -1;
+      if (canvasRef.height / 2 <= y) {
+        imaginary_2 = (y - canvasRef.height / 2) * -1;
       } else {
-        imaginary_2 = canvasRef.height / 2 - imaginary;
+        imaginary_2 = canvasRef.height / 2 - y;
       }
 
       pushCoordenate({
