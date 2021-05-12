@@ -193,7 +193,7 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
   const finishMovement = (): void => {
     if (setIsDrawingFinished && isDrawing.current) {
       const diiferenceIterations = 0.01;
-      const speedInterval = 1;
+      const speedInterval = 0.00001;
 
       // y = -> [m] x + b
       // (y2 - y1) / (x2 - x1)
@@ -212,6 +212,8 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
       // y = m -> [x] + b
       var iteration = 0;
       isDrawing.current = false;
+
+      var counter: number = 0;
       setIsDrawingFinishedLocal(true);
       const itervalLastMove = setInterval(() => {
         if (
@@ -238,13 +240,17 @@ export const useDrawing: PropsDrawingHook = (canvasRef, pencilColor) => {
 
           // push cooordenates
           if (secondsDrawing !== undefined) {
-            pushCoordenateInRelationCenter(
-              currX.current,
-              currY.current,
-              round(secondsDrawing + iteration)
-            );
+            if (counter % 10 === 0) {
+              pushCoordenateInRelationCenter(
+                currX.current,
+                currY.current,
+                round(secondsDrawing + iteration)
+              );
+            }
           }
         }
+
+        counter = counter + 1;
       }, speedInterval);
     }
   };

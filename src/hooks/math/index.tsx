@@ -1,11 +1,11 @@
-import { useContext, useRef } from "react";
+import { useContext, useRef, useEffect } from "react";
 
 import { GlobalContext, ObjectForCoordenates } from "../../App";
 
 import { round } from "../../helpers/index";
 
 // Math.js
-import { Complex, pow, add, multiply, complex, divide } from "mathjs";
+import { Complex, pow, add, multiply, complex } from "mathjs";
 
 type ObjectForCoefficients = {
   real: number;
@@ -24,9 +24,22 @@ interface Coordenates {
 }
 
 export const useCoordenates: Coordenates = () => {
-  const { coordenatesArray, setCoordenatesArray } = useContext(GlobalContext);
+  const {
+    coordenatesArray,
+    setCoordenatesArray,
+    isCanvasAnimations,
+  } = useContext(GlobalContext);
 
   const arrayCoefficients = useRef<Array<ObjectForCoefficients>>([]);
+  const intervalAnimations = useRef<any>(null);
+  const maximumTime = useRef<number>(0);
+
+  useEffect(() => {
+    if (!isCanvasAnimations) {
+      clearInterval(intervalAnimations.current);
+      arrayCoefficients.current = [];
+    }
+  }, [isCanvasAnimations]);
 
   const pushCoordenateInRelationCanvas = (
     real: number,
@@ -44,6 +57,18 @@ export const useCoordenates: Coordenates = () => {
       y = canvasRef.height / 2 - imaginary;
       return { x, y };
     }
+  };
+
+  const getRadiusCircle = (
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number
+  ): number => {
+    var deltaX: number = (x1 - x2) ** 2;
+    var deltaY: number = (y1 - y2) ** 2;
+
+    return (deltaX + deltaY) ** 0.5;
   };
 
   const pushCoordenateInRelationCenter = (
@@ -79,13 +104,16 @@ export const useCoordenates: Coordenates = () => {
       var newArrayCoordenates: Array<ObjectForCoordenates> = [];
       var timeNow: number = 0;
       for (var i = 0; i < coordenatesArray.length; i++) {
-        var oNow: any = coordenatesArray[i];
-        newArrayCoordenates.push({
-          real: oNow.real,
-          imaginary: oNow.imaginary,
-          time: timeNow,
-        });
-        timeNow = round(timeNow + 0.01);
+        if (i % 2 === 0) {
+          var oNow: any = coordenatesArray[i];
+          maximumTime.current = timeNow;
+          newArrayCoordenates.push({
+            real: oNow.real,
+            imaginary: oNow.imaginary,
+            time: timeNow,
+          });
+          timeNow = round(timeNow + 0.01);
+        }
       }
       if (setCoordenatesArray) {
         setCoordenatesArray(newArrayCoordenates);
@@ -123,10 +151,10 @@ export const useCoordenates: Coordenates = () => {
             multiply(complexNumber, multiply(delta_t, elevation))
           );
         }
-        sum_n = divide(
-          sum_n,
-          arrayCoordenatesUpdated[arrayCoordenatesUpdated.length - 1].time
-        );
+        // sum_n = divide(
+        //   sum_n,
+        //   arrayCoordenatesUpdated[arrayCoordenatesUpdated.length - 1].time
+        // );
 
         /* 
           -> siendo los valores de n asi: 0, 1, -1, 2, -2, 3, -3, ... n, -n
@@ -155,28 +183,6 @@ export const useCoordenates: Coordenates = () => {
     canvasAnimationsRef: HTMLCanvasElement | null,
     canvasRef: HTMLCanvasElement | null
   ): void => {
-    // var exponent_1: any = complex(0, Math.PI * 0.5);
-    // var elevation_1: any = pow(Math.E, exponent_1);
-
-    // var exponent_2: any = complex(0, Math.PI * 0.25);
-    // var elevation_2: any = pow(Math.E, exponent_2);
-    // arrayCoefficients.current = [
-    //   {
-    //     real: multiply(100, elevation_1),
-    //     imaginary: 0,
-    //     frequency: -1,
-    //   },
-    //   {
-    //     real: multiply(50, elevation_2),
-    //     imaginary: 0,
-    //     frequency: 1,
-    //   },
-    //   {
-    //     real: multiply(25, elevation_1),
-    //     imaginary: 0,
-    //     frequency: -.5,
-    //   },
-    // ];
     if (canvasAnimationsRef && canvasRef) {
       var speedInterval: number = 50;
       var timer: number = 0;
@@ -186,8 +192,7 @@ export const useCoordenates: Coordenates = () => {
       var ctx = canvasAnimationsRef.getContext("2d"); // Canvas of Vectors
       var ctx_2 = canvasRef.getContext("2d"); // Canvas of green line
 
-      const interval = setInterval(() => {
-        // clearInterval(interval);
+      intervalAnimations.current = setInterval(() => {
         if (ctx) {
           // Clear canvas of vectors
           ctx.clearRect(
@@ -216,11 +221,6 @@ export const useCoordenates: Coordenates = () => {
           var elevation: any = pow(Math.E, exponent);
           var finalPos: any = multiply(coefficient, elevation);
 
-          // var exponent: any = complex(0, 2 * -1 * Math.PI * timer);
-          // var elevation: any = pow(Math.E, exponent);
-
-          // var finalPos: any = multiply(coefficient, elevation);
-
           var coordenatesInRelationCanvas = pushCoordenateInRelationCanvas(
             finalPos.re,
             finalPos.im,
@@ -233,6 +233,10 @@ export const useCoordenates: Coordenates = () => {
             canvasAnimationsRef
           );
 
+          /**
+           * VECTORES
+           */
+
           if (ctx && coordenatesInRelationCanvas && coordenatesForSum) {
             ctx.beginPath();
             ctx.moveTo(startPos.re, startPos.im);
@@ -240,12 +244,31 @@ export const useCoordenates: Coordenates = () => {
               coordenatesInRelationCanvas.x + coordenatesForSum.real,
               coordenatesInRelationCanvas.y - coordenatesForSum.imaginary
             );
-            if (n === 0) {
-              ctx.strokeStyle = "#F00";
-            } else {
-              ctx.strokeStyle = "#FFF";
-            }
+            ctx.strokeStyle = "#FFF";
+            /**
+             * VECTOR
+             */
             ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.closePath();
+
+            /**
+             * CIRCLE
+             */
+            ctx.beginPath();
+            ctx.arc(
+              startPos.re,
+              startPos.im,
+              getRadiusCircle(
+                startPos.re,
+                startPos.im,
+                coordenatesInRelationCanvas.x + coordenatesForSum.real,
+                coordenatesInRelationCanvas.y - coordenatesForSum.imaginary
+              ), // radius
+              0,
+              2 * Math.PI
+            );
+            ctx.lineWidth = 0.5;
             ctx.stroke();
             ctx.closePath();
 
@@ -256,12 +279,15 @@ export const useCoordenates: Coordenates = () => {
           }
         }
 
+        /**
+         * TRAZO ULTIMO VECTOR
+         */
         if (ctx_2 && coordenatesInRelationCanvas && timer !== 0) {
           ctx_2.beginPath();
           ctx_2.moveTo(startPos_previous.re, startPos_previous.im);
           ctx_2.lineTo(startPos.re, startPos.im);
-          ctx_2.strokeStyle = "#0F0";
-          ctx_2.lineWidth = 1;
+          ctx_2.strokeStyle = "#0FF";
+          ctx_2.lineWidth = 2;
           ctx_2.stroke();
           ctx_2.closePath();
         }
@@ -270,7 +296,11 @@ export const useCoordenates: Coordenates = () => {
         startPos_previous.re = startPos.re;
         startPos_previous.im = startPos.im;
 
-        timer = round(timer + 0.01);
+        if (timer >= maximumTime.current) {
+          timer = 0;
+        } else {
+          timer = round(timer + 0.01);
+        }
       }, speedInterval);
     }
   };

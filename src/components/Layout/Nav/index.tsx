@@ -42,6 +42,7 @@ const Nav = () => {
                 breakInterval &&
                 setCoordenatesArray &&
                 setRestartCoordenates &&
+                setIsCanvasAnimations && 
                 setIsCanvasAnimations
               ) {
                 setIsCanvasAnimations(false);
@@ -49,6 +50,8 @@ const Nav = () => {
                 breakInterval();
                 setRestartCoordenates(true);
                 setSecondsDrawing(0);
+                setIsCanvasAnimations(false);
+                setCoordenatesArray([]);
               }
             }}
           >
@@ -61,8 +64,10 @@ const Nav = () => {
               setMessagesColor("#F00");
               setMessagesText("First you need to draw something in the canvas");
             } else {
-              if (setIsCanvasAnimations) {
+              if (setIsCanvasAnimations && setMessagesText && setMessagesColor) {
                 setIsCanvasAnimations(true);
+                setMessagesColor("#000");
+                setMessagesText("Drawing...");
               }
             }
           }}

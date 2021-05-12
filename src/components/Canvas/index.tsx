@@ -28,6 +28,26 @@ const Canvas = () => {
     if (isCanvasAnimations) {
       comb();
       renderVectors(canvasAnimations.current, canvasRef.current);
+    } else {
+      // DELETE CANVAS CONTENT
+      if (canvasAnimations.current && canvasRef.current) {
+        var ctx = canvasAnimations.current.getContext("2d"); // Canvas of Vectors
+        var ctx_2 = canvasRef.current.getContext("2d"); // Canvas of green line
+        if (ctx && ctx_2) {
+          ctx.clearRect(
+            0,
+            0,
+            canvasAnimations.current.width,
+            canvasAnimations.current.height
+          );
+          ctx_2.clearRect(
+            0,
+            0,
+            canvasRef.current.width,
+            canvasRef.current.height
+          );
+        }
+      }
     }
   }, [isCanvasAnimations]);
 
